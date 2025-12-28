@@ -26,6 +26,9 @@ using SlideBuilder.Api.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load local configuration if exists
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
 // Add services to the container.
 builder.Services.Configure<SlideBuilder.Core.Configuration.AppSettings>(builder.Configuration);
 
