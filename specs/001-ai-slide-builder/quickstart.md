@@ -9,6 +9,34 @@ This quickstart describes the intended run workflow for the MVP. Code scaffoldin
 - OSS credentials available
 - OpenAI-compatible model endpoint credentials available
 
+## Project Structure
+
+- `backend/`: .NET 10 Web API, Core, and Infrastructure.
+- `frontend/`: Vue 3 + Vite + TypeScript application.
+- `tools/pug-compiler/`: Internal Node.js tool for Pug compilation.
+
+## Local Development
+
+### Backend
+```bash
+cd backend/src
+dotnet run --project SlideBuilder.Api
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Pug Compiler
+```bash
+cd tools/pug-compiler
+npm install
+node index.js input.pug output.html
+```
+
 ## Configuration (environment variables)
 
 Backend configuration should be provided via environment variables (no secrets committed).
@@ -20,6 +48,19 @@ Backend configuration should be provided via environment variables (no secrets c
 - `OSS_ACCESS_KEY_ID`
 - `OSS_ACCESS_KEY_SECRET`
 - `OSS_BUCKET`
+
+## Manual Validation Checklist
+
+Before considering the implementation complete, verify the following:
+
+1.  **Project Creation**: Can create a new project and see it in the list.
+2.  **Outline Approval**: Can draft an outline, edit it, and approve it.
+3.  **Style Brief**: Can define style fields and approve the brief.
+4.  **Generation**: Can start a generation job and see real-time progress via SignalR.
+5.  **Preview**: Can view the compiled HTML preview of the generated slides.
+6.  **Assets**: Can upload an image and insert it into a slide.
+7.  **Export**: Can trigger an export and download the self-contained presentation.
+8.  **Persistence**: Refreshing the page or restarting the server preserves all project data.
 - `OSS_PREFIX` (optional)
 
 ## Run (intended)
