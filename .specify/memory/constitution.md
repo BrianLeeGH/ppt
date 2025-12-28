@@ -1,50 +1,84 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: template → 0.1.0
+- Modified principles: placeholders → defined (5 principles)
+- Added sections: Architecture Constraints, Workflow & Quality Gates
+- Removed sections: none
+- Templates requiring updates:
+	- ✅ .specify/templates/spec-template.md
+	- ✅ .specify/templates/plan-template.md (reference now backed by commands doc)
+	- ⚠ pending: .specify/templates/tasks-template.md (no change required)
+	- ✅ .specify/templates/commands/plan.md (created)
+- Follow-up TODOs: none
+-->
+
+# AI Slide Builder Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Confirm Before Generate (Outline + Style Brief)
+Every presentation feature MUST have explicit user-confirmation gates before “full generation”:
+- Outline MUST be drafted, shown, editable, and explicitly approved.
+- Style Brief MUST be drafted, shown, editable, and explicitly approved.
+- If the user skips either gate, the system MUST still present a derived draft for quick confirmation.
+Rationale: Slide output quality depends on structure + style; confirmation reduces rework.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Durable Work Products (Resumable, Versioned)
+All authoring must be resumable across sessions/devices:
+- The system MUST persist outline, style brief, conversation, revisions, and job progress.
+- A user reopening a project MUST see the latest known progress and the latest usable preview.
+- Regeneration MUST be attributable to a new revision/job so users can compare outputs.
+Rationale: Users will close browsers/devices; continuity is core UX.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. MVP-First Simplicity (NON-NEGOTIABLE)
+Start with the smallest architecture that can validate the product:
+- Prefer coarse-grained jobs/stages over fine-grained orchestration.
+- Avoid introducing extra services unless they remove clear, demonstrated pain.
+- Any added complexity MUST be justified in the plan’s “Complexity Tracking” section.
+Rationale: This is an MVP; complexity can be added later, but is hard to remove.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Provider-Agnostic AI Integration
+Model access MUST be swappable by configuration:
+- Use an OpenAI-compatible API surface behind a single abstraction boundary.
+- Prompts MUST request structured, machine-checkable outputs (e.g., JSON + code blocks), not free-form file trees.
+- Model/provider identifiers MUST NOT leak into core domain objects.
+Rationale: Avoid lock-in and keep the system testable.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Security and Data Handling
+Protect user content and credentials:
+- Secrets (API keys, storage keys) MUST NOT be committed; use configuration mechanisms.
+- Logs MUST avoid including secrets and should minimize sensitive user content.
+- Object storage MUST be treated as untrusted input; validate and handle missing/corrupt assets gracefully.
+Rationale: Presentations can contain sensitive material; secure-by-default avoids rework.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Architecture Constraints
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Frontend MUST be Vue 3 and MUST use Pinia for app state.
+- Backend MUST be .NET (targeting .NET 10).
+- Pug/CSS/JS are first-class generated artifacts; compilation to HTML MUST be repeatable.
+- A Node-based Pug compilation tool MAY exist as an internal build tool, not a separately deployed service.
+- Object storage MUST be abstracted behind a provider interface.
+- MVP implementation MUST target OSS first.
+- The abstraction MUST allow switching to S3 later without changing domain logic.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Workflow & Quality Gates
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- All work starts from a feature spec in specs/; non-trivial decisions MUST be recorded in a Clarifications section.
+- Implementation plans MUST include a Constitution Check section and address any violations.
+- Changes that affect multiple layers (frontend/backend/storage/AI integration) MUST include a small integration validation step.
+- If a change introduces new configuration/secrets, it MUST document required environment variables.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- This constitution supersedes templates, plans, and tasks.
+- Amendments MUST be made via PR with:
+	- A clear rationale
+	- A compatibility/migration note (if behavior changes)
+	- An updated version number
+- Versioning policy:
+	- MAJOR: Removing/weakening a principle or making governance less strict
+	- MINOR: Adding a new principle/section or materially expanding requirements
+	- PATCH: Clarifications, wording improvements, no semantic change
+- Reviews MUST include an explicit “Constitution Check” pass/fail statement.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 0.1.0 | **Ratified**: 2025-12-28 | **Last Amended**: 2025-12-28

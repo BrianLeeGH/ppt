@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
+## Clarifications
+
+<!--
+  Record key decisions that affect scope, UX, architecture constraints, or external integrations.
+  Keep this short and auditable (Q → A format). If there are no decisions yet, leave an explicit
+  statement like “No clarifications recorded.”
+-->
+
+- Q: [Question] → A: [Answer]
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--

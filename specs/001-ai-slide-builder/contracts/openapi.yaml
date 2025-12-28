@@ -1,0 +1,336 @@
+openapi: 3.0.3
+info:
+  title: AI Slide Builder API
+  version: 0.1.0
+servers:
+  - url: /api
+paths:
+  /projects:
+    post:
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required: [name]
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+    get:
+      summary: List projects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+
+  /projects/{projectId}:
+    get:
+      summary: Get a project
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /projects/{projectId}/messages:
+    post:
+      summary: Append a chat message (authoring)
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageInput'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessageAccepted'
+
+  /projects/{projectId}/outline:
+    get:
+      summary: Get current outline (draft or approved pointer)
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Outline'
+    put:
+      summary: Update outline draft
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Outline'
+      responses:
+        '200':
+          description: OK
+
+  /projects/{projectId}/outline/approve:
+    post:
+      summary: Approve outline
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+
+  /projects/{projectId}/style-brief:
+    get:
+      summary: Get current style brief
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleBrief'
+    put:
+      summary: Update style brief draft
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleBrief'
+      responses:
+        '200':
+          description: OK
+
+  /projects/{projectId}/style-brief/approve:
+    post:
+      summary: Approve style brief
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+
+  /projects/{projectId}/jobs:
+    post:
+      summary: Start a generation job
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartJobRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+  /jobs/{jobId}:
+    get:
+      summary: Get job status
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+  /jobs/{jobId}/stop:
+    post:
+      summary: Stop a job (MVP coarse-grained)
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: OK
+
+  /projects/{projectId}/preview:
+    get:
+      summary: Get latest preview info
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewInfo'
+
+  /projects/{projectId}/export:
+    post:
+      summary: Export latest revision
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '202':
+          description: Accepted
+
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Project:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, createdAt, updatedAt]
+
+    OutlineSlide:
+      type: object
+      properties:
+        title: { type: string }
+        keyPoints:
+          type: array
+          items: { type: string }
+      required: [title, keyPoints]
+
+    Outline:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Draft, Approved]
+        slides:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutlineSlide'
+      required: [status, slides]
+
+    StyleBrief:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Draft, Approved]
+        visualTone:
+          type: string
+          enum: [Minimal, Corporate, Editorial, Playful, Bold]
+        audienceContext:
+          type: string
+        informationDensity:
+          type: string
+          enum: [Low, Medium, High]
+        emphasisLevel:
+          type: string
+          enum: [Calm, Balanced, Punchy]
+        contrastPreference:
+          type: string
+          enum: [Normal, High]
+        typographyHierarchy:
+          type: string
+          enum: [H1-dominant, Balanced, Body-dominant]
+        layoutRhythm:
+          type: string
+          enum: [Spacious, Compact]
+        motionFeel:
+          type: string
+          enum: [None, Subtle, Dynamic]
+        mediaTreatment:
+          type: string
+          enum: [Sparse, Balanced, Visual-heavy]
+        brandConstraints:
+          type: string
+      required:
+        - status
+        - visualTone
+        - audienceContext
+        - informationDensity
+        - emphasisLevel
+        - contrastPreference
+        - typographyHierarchy
+        - layoutRhythm
+        - motionFeel
+        - mediaTreatment
+
+    Job:
+      type: object
+      properties:
+        id: { type: string }
+        status:
+          type: string
+          enum: [Queued, Running, Succeeded, Failed, Stopped]
+        stage:
+          type: string
+          enum: [DraftOutline, OutlineApproved, GenerateSlides, CompilePreview, Export, UploadAssets]
+        updatedAt: { type: string, format: date-time }
+        error: { type: string }
+      required: [id, status, stage, updatedAt]
+
+    StartJobRequest:
+      type: object
+      properties:
+        requestedStage:
+          type: string
+          enum: [DraftOutline, GenerateSlides, CompilePreview, Export]
+      required: [requestedStage]
+
+    ChatMessageInput:
+      type: object
+      properties:
+        content: { type: string }
+      required: [content]
+
+    ChatMessageAccepted:
+      type: object
+      properties:
+        messageId: { type: string }
+      required: [messageId]
+
+    PreviewInfo:
+      type: object
+      properties:
+        revisionId: { type: string }
+        url: { type: string }
+        updatedAt: { type: string, format: date-time }
+      required: [revisionId, url, updatedAt]
