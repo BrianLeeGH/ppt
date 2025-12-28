@@ -23,3 +23,6 @@ Thumbs.db
 
 # Tools
 tools/pug-compiler/node_modules/
+
+# Claude Code
+.claude/settings.local.json
