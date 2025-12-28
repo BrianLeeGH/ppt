@@ -36,7 +36,7 @@ public class CompilePreviewStage : IJobStage
         _logger.LogInformation("Starting CompilePreview stage for job {JobId}", job.Id);
 
         var projectRepo = _uow.GetRepository<Project>();
-        var project = await projectRepo.GetByIdAsync(job.ProjectId);
+        var project = await projectRepo.GetSingleAsync(p => p.Id == job.ProjectId, "Deck.Slides");
         if (project == null) throw new Exception("Project not found");
 
         var assetRepo = _uow.GetRepository<Asset>();

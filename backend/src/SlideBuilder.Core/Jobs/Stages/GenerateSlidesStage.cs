@@ -36,7 +36,7 @@ public class GenerateSlidesStage : IJobStage
         _logger.LogInformation("Starting GenerateSlides stage for job {JobId}", job.Id);
 
         var projectRepo = _uow.GetRepository<Project>();
-        var project = await projectRepo.GetByIdAsync(job.ProjectId);
+        var project = await projectRepo.GetSingleAsync(p => p.Id == job.ProjectId, "Deck.DraftOutline", "Deck.DraftStyleBrief");
         if (project == null || project.Deck == null)
             throw new Exception("Project or Deck not found");
 

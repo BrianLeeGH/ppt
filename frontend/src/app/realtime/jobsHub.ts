@@ -1,6 +1,6 @@
 import * as signalR from '@microsoft/signalr';
 
-const hubUrl = import.meta.env.VITE_HUB_BASE_URL || 'http://localhost:5000/hubs/jobs';
+const hubUrl = import.meta.env.VITE_HUB_BASE_URL || 'http://localhost:5282/hubs/jobs';
 
 export const createJobsHubConnection = (projectId: string) => {
   const connection = new signalR.HubConnectionBuilder()

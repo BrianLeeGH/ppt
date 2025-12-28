@@ -35,7 +35,7 @@ public class ExportService : IExportService
     public async Task<Stream> CreateExportAsync(Guid projectId, CancellationToken ct)
     {
         var projectRepo = _uow.GetRepository<Project>();
-        var project = await projectRepo.GetByIdAsync(projectId);
+        var project = await projectRepo.GetSingleAsync(p => p.Id == projectId, "Deck.Slides");
         if (project == null) throw new Exception("Project not found");
 
         var artifact = _artifactService.Generate(project);

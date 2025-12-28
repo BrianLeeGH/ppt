@@ -34,7 +34,7 @@ public class SlideEditService : ISlideEditService
         if (slide == null) throw new Exception("Slide not found");
 
         var projectRepo = _uow.GetRepository<Project>();
-        var project = await projectRepo.FindAsync(p => p.Deck != null && p.Deck.Id == slide.DeckId);
+        var project = await projectRepo.FindAsync(p => p.Deck != null && p.Deck.Id == slide.DeckId, "Deck.DraftOutline", "Deck.DraftStyleBrief");
         var proj = project.FirstOrDefault();
         if (proj == null) throw new Exception("Project not found");
 

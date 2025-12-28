@@ -62,6 +62,17 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddRequestLogging();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Validate Configuration
@@ -77,6 +88,8 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ProblemDetailsMiddleware>();
 app.UseRequestLogging();
+
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {

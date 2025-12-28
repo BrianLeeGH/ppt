@@ -22,13 +22,13 @@ public class OutlineService : IOutlineService
 
     public async Task<Outline?> GetOutlineByProjectIdAsync(Guid projectId)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftOutline");
         return project?.Deck?.DraftOutline;
     }
 
     public async Task<Outline?> UpdateOutlineAsync(Guid projectId, string slidesJson)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftOutline");
         if (project?.Deck?.DraftOutline == null) return null;
 
         project.Deck.DraftOutline.SlidesJson = slidesJson;
@@ -40,7 +40,7 @@ public class OutlineService : IOutlineService
 
     public async Task<Outline?> ApproveOutlineAsync(Guid projectId)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftOutline");
         if (project?.Deck?.DraftOutline == null) return null;
 
         project.Deck.DraftOutline.Status = OutlineStatus.Approved;

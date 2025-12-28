@@ -19,7 +19,7 @@ public class ProjectStatusController : ControllerBase
     public async Task<ActionResult<ProjectStatusDto>> GetProjectStatus(Guid id)
     {
         var projectRepo = _uow.GetRepository<Project>();
-        var project = await projectRepo.GetByIdAsync(id);
+        var project = await projectRepo.GetSingleAsync(p => p.Id == id, "Deck.DraftOutline", "Deck.DraftStyleBrief", "Deck.Slides");
         if (project == null) return NotFound();
 
         var jobRepo = _uow.GetRepository<Job>();

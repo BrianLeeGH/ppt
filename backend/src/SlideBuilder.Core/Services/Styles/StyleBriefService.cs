@@ -21,13 +21,13 @@ public class StyleBriefService : IStyleBriefService
 
     public async Task<StyleBrief?> GetStyleBriefByProjectIdAsync(Guid projectId)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftStyleBrief");
         return project?.Deck?.DraftStyleBrief;
     }
 
     public async Task<StyleBrief?> UpdateStyleBriefAsync(Guid projectId, string fieldsJson)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftStyleBrief");
         if (project?.Deck?.DraftStyleBrief == null) return null;
 
         project.Deck.DraftStyleBrief.FieldsJson = fieldsJson;
@@ -39,7 +39,7 @@ public class StyleBriefService : IStyleBriefService
 
     public async Task<StyleBrief?> ApproveStyleBriefAsync(Guid projectId)
     {
-        var project = await _uow.GetRepository<Project>().GetByIdAsync(projectId);
+        var project = await _uow.GetRepository<Project>().GetSingleAsync(p => p.Id == projectId, "Deck.DraftStyleBrief");
         if (project?.Deck?.DraftStyleBrief == null) return null;
 
         project.Deck.DraftStyleBrief.Status = StyleBriefStatus.Approved;
