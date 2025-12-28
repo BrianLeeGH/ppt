@@ -16,5 +16,12 @@ public interface IRepository<T> where T : class
 public interface IUnitOfWork : IDisposable
 {
     IRepository<T> GetRepository<T>() where T : class;
+
+    // Specialized repositories
+    IRepository<SlideBuilder.Core.Domain.Project> Projects { get; }
+    IRepository<SlideBuilder.Core.Domain.Job> Jobs { get; }
+    IOutlineRevisionRepository OutlineRevisions { get; }
+
     Task<int> SaveChangesAsync();
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

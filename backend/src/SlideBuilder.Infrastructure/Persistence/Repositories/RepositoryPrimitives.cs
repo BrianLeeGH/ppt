@@ -58,6 +58,7 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly SlideBuilderDbContext _context;
     private readonly Dictionary<Type, object> _repositories = new();
+    private OutlineRevisionRepository? _outlineRevisions;
 
     public UnitOfWork(SlideBuilderDbContext context)
     {
@@ -76,7 +77,14 @@ public class UnitOfWork : IUnitOfWork
         return repository;
     }
 
+    // Specialized repositories
+    public IRepository<SlideBuilder.Core.Domain.Project> Projects => GetRepository<SlideBuilder.Core.Domain.Project>();
+    public IRepository<SlideBuilder.Core.Domain.Job> Jobs => GetRepository<SlideBuilder.Core.Domain.Job>();
+    public SlideBuilder.Core.Persistence.IOutlineRevisionRepository OutlineRevisions =>
+        _outlineRevisions ??= new OutlineRevisionRepository(_context);
+
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 
     public void Dispose() => _context.Dispose();
 }

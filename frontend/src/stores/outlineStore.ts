@@ -19,6 +19,7 @@ export const useOutlineStore = defineStore('outline', {
     outline: null as Outline | null,
     loading: false,
     error: null as string | null,
+    changedSlideIndices: [] as number[],
   }),
   actions: {
     async fetchOutline(projectId: string) {
@@ -55,6 +56,19 @@ export const useOutlineStore = defineStore('outline', {
       } finally {
         this.loading = false;
       }
+    },
+    setOutline(outline: Outline) {
+      this.outline = outline;
+    },
+    setChangedSlides(indices: number[]) {
+      this.changedSlideIndices = indices;
+      // Clear highlights after 3 seconds
+      setTimeout(() => {
+        this.changedSlideIndices = [];
+      }, 3000);
+    },
+    clearError() {
+      this.error = null;
     },
   },
 });

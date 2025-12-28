@@ -1,0 +1,328 @@
+openapi: 3.0.3
+info:
+  title: Conversational Outline Generation API
+  description: REST API for conversational outline creation, editing, and approval
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+
+tags:
+  - name: Conversation
+    description: Endpoints for managing conversation messages
+  - name: Outline
+    description: Endpoints for outline operations (enhanced for conversational flow)
+
+paths:
+  /projects/{projectId}/conversation/messages:
+    get:
+      summary: Get conversation messages for a project
+      description: Returns all conversation messages in chronological order, optionally paginated
+      tags:
+        - Conversation
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of messages to return (default 50, max 200)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: before
+          in: query
+          description: Return messages created before this timestamp (for pagination)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of conversation messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConversationMessageDto'
+                  hasMore:
+                    type: boolean
+                    description: Whether there are more messages available
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      summary: Send a new message in the conversation
+      description: |
+        Creates a new user message and triggers AI processing to generate or modify the outline.
+        This is the primary endpoint for conversational interaction.
+      tags:
+        - Conversation
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '202':
+          description: Message accepted and processing started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageId:
+                    type: string
+                    format: uuid
+                    description: ID of the created user message
+                  jobId:
+                    type: string
+                    format: uuid
+                    description: ID of the job processing this message
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/outline/revisions:
+    get:
+      summary: Get outline revision history
+      description: Returns all outline revisions for a project in chronological order
+      tags:
+        - Outline
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of outline revisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revisions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OutlineRevisionDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/outline/current:
+    get:
+      summary: Get current outline
+      description: Returns the current draft or approved outline with its latest revision
+      tags:
+        - Outline
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Current outline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutlineDto'
+        '404':
+          description: Project exists but has no outline yet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ConversationMessageDto:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [User, Assistant, System]
+          description: Who sent the message
+        content:
+          type: string
+          maxLength: 10000
+          description: Message text content
+        createdAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          description: Optional metadata (e.g., triggered outline revision ID)
+          additionalProperties: true
+
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: User message text
+          example: "Add a slide about renewable energy after slide 3"
+
+    OutlineDto:
+      type: object
+      required:
+        - id
+        - status
+        - slides
+        - createdAt
+        - currentRevisionNumber
+      properties:
+        id:
+          type: string
+          format: uuid
+        deckId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [Draft, Approved]
+        slides:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlideDto'
+        createdAt:
+          type: string
+          format: date-time
+        currentRevisionNumber:
+          type: integer
+          minimum: 1
+          description: Latest revision number for this outline
+
+    SlideDto:
+      type: object
+      required:
+        - title
+        - keyPoints
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          example: "Introduction to Climate Change"
+        keyPoints:
+          type: array
+          minItems: 2
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 500
+          example:
+            - "Definition and causes of climate change"
+            - "Global temperature trends over the last century"
+            - "Impact on ecosystems and human society"
+
+    OutlineRevisionDto:
+      type: object
+      required:
+        - id
+        - revisionNumber
+        - slides
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        outlineId:
+          type: string
+          format: uuid
+        revisionNumber:
+          type: integer
+          minimum: 1
+        slides:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlideDto'
+        createdAt:
+          type: string
+          format: date-time
+        triggeredByMessageId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID of the conversation message that triggered this revision
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "ValidationError"
+            message: "Message content cannot be empty"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "NotFound"
+            message: "Project not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "InternalError"
+            message: "An unexpected error occurred"

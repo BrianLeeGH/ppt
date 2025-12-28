@@ -11,6 +11,10 @@ public class AiSettings
     public string BaseUrl { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
+    public int MaxRetries { get; set; } = 3;
+    public int TimeoutSeconds { get; set; } = 30;
+    public int ContextWindowSize { get; set; } = 20;
+    public int SummaryThreshold { get; set; } = 30;
 }
 
 public class OssSettings

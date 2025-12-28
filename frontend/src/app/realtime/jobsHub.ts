@@ -16,6 +16,14 @@ export const createJobsHubConnection = (projectId: string) => {
     console.log('Job progress updated:', progress);
   });
 
+  connection.on('OutlineUpdated', (outlineEvent) => {
+    console.log('Outline updated:', outlineEvent);
+  });
+
+  connection.on('MessageReceived', (message) => {
+    console.log('Message received:', message);
+  });
+
   const start = async () => {
     try {
       await connection.start();

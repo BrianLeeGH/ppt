@@ -22,6 +22,8 @@ using SlideBuilder.Infrastructure.Persistence;
 using SlideBuilder.Infrastructure.Persistence.Repositories;
 using SlideBuilder.Infrastructure.Storage;
 using SlideBuilder.Infrastructure.Compilation;
+using SlideBuilder.Api.Events;
+using SlideBuilder.Core.Events;
 using SlideBuilder.Api.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,8 +38,19 @@ builder.Services.AddDbContext<SlideBuilderDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=slidebuilder.db"));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IConversationRepository, SlideBuilder.Infrastructure.Persistence.Repositories.ConversationRepository>();
 builder.Services.AddScoped<IObjectStorage, OssObjectStorage>();
+
+// Configure IModelClient with HttpClient
 builder.Services.AddHttpClient<IModelClient, OpenAiCompatibleModelClient>();
+// TODO: Add Polly retry policy when package is available
+// .AddStandardResilienceHandler(options =>
+// {
+//     options.Retry.MaxRetryAttempts = 3;
+//     options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+//     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(30);
+// });
+
 builder.Services.AddScoped<IJobRunner, JobRunner>();
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
@@ -55,6 +68,10 @@ builder.Services.AddScoped<IPugCompilationService, PugCompilationService>();
 
 builder.Services.AddScoped<ISlideGenerationPromptBuilder, SlideGenerationPromptBuilder>();
 builder.Services.AddScoped<IModelOutputParser, ModelOutputParser>();
+builder.Services.AddScoped<SlideBuilder.Core.AI.Prompts.ContextWindowManager>();
+builder.Services.AddScoped<SlideBuilder.Core.AI.Prompts.OutlinePromptBuilder>();
+
+builder.Services.AddScoped<IEventPublisher, SignalREventPublisher>();
 
 builder.Services.AddScoped<IJobStage, SlideBuilder.Core.Jobs.Stages.DraftOutlineStage>();
 builder.Services.AddScoped<IJobStage, SlideBuilder.Core.Jobs.Stages.GenerateSlidesStage>();

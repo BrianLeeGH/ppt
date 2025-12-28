@@ -10,6 +10,7 @@ public class Project
     public Deck? Deck { get; set; }
     public ICollection<Asset> Assets { get; set; } = new List<Asset>();
     public ICollection<ConversationMessage> Messages { get; set; } = new List<ConversationMessage>();
+    public ICollection<ConversationSummary> ConversationSummaries { get; set; } = new List<ConversationSummary>();
     public ICollection<Job> Jobs { get; set; } = new List<Job>();
     public ICollection<Revision> Revisions { get; set; } = new List<Revision>();
 }
@@ -33,12 +34,27 @@ public class Outline
     public OutlineStatus Status { get; set; }
     public string SlidesJson { get; set; } = "[]"; // Store as JSON for simplicity in MVP
     public DateTime CreatedAt { get; set; }
+
+    public ICollection<OutlineRevision> Revisions { get; set; } = new List<OutlineRevision>();
 }
 
 public enum OutlineStatus
 {
     Draft,
     Approved
+}
+
+public class OutlineRevision
+{
+    public Guid Id { get; set; }
+    public Guid OutlineId { get; set; }
+    public Guid? TriggeredByMessageId { get; set; }
+    public string SlidesJson { get; set; } = "[]";
+    public int RevisionNumber { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public Outline Outline { get; set; } = null!;
+    public ConversationMessage? TriggeredByMessage { get; set; }
 }
 
 public class StyleBrief
@@ -94,6 +110,18 @@ public class ConversationMessage
     public string Role { get; set; } = string.Empty; // User/Assistant/System
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+}
+
+public class ConversationSummary
+{
+    public Guid Id { get; set; }
+    public Guid ProjectId { get; set; }
+    public int CoveringMessagesFrom { get; set; }
+    public int CoveringMessagesTo { get; set; }
+    public string SummaryText { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+
+    public Project Project { get; set; } = null!;
 }
 
 public class Revision

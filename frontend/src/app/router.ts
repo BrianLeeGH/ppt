@@ -11,6 +11,11 @@ const router = createRouter({
     {
       path: '/projects/:projectId/outline',
       name: 'outline',
+      component: () => import('../pages/ConversationalOutlinePage.vue'),
+    },
+    {
+      path: '/projects/:projectId/outline/manual',
+      name: 'outline-manual',
       component: () => import('../pages/OutlinePage.vue'),
     },
     {
